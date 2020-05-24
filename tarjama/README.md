@@ -37,23 +37,20 @@ After the installation, support for Arabic can be enabled by running `bicon` fro
 # SQLite database
 -----------------
 ## Prerequisites
-- SQLite
+- SQLite and SQLAlchemy
 
 ```bash
 sudo apt install sqlite3
+pip install sqlalchemy
 ```
 
-## Create and fill database
+## Database
+The database table is created automatically if it doesn't exist.
+
 ```bash
 $ sqlite3 database.db
 
-sqlite> CREATE TABLE words (
-   ...> id INTEGER PRIMARY KEY AUTOINCREMENT,
-   ...> word TEXT NOT NULL,
-   ...> translation TEXT NOT NULL
-   ...> );
-sqlite> INSERT INTO words (word, translation)
-   ...> VALUES ('نوبة', 'seizure');
+sqlite> SELECT * FROM words;
 ```
 
 # License

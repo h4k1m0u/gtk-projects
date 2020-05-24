@@ -1,12 +1,8 @@
-from sqlalchemy import create_engine
+from models import Word, session_scope
 import gi
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gio
-
-
-# connect to sqlite database file
-engine = create_engine('sqlite:///database.db')
 
 
 class MyWindow(Gtk.Window):
@@ -65,25 +61,40 @@ class MyWindow(Gtk.Window):
         button_search.add(image)
         headerbar.pack_end(button_search)
 
-        # layout container
-        self.box = Gtk.Box(spacing=6, orientation=Gtk.Orientation.VERTICAL)
-        self.add(self.box)
+        # connect handler to buttons click events
+        button_add.connect('clicked', self.add_word)
+        button_remove.connect('clicked', self.remove_word)
+        button_edit.connect('clicked', self.edit_word)
+        button_down.connect('clicked', self.goto_next_word)
+        button_up.connect('clicked', self.goto_previous_word)
+        button_search.connect('clicked', self.search_word)
 
-        # button & its click event
-        self.button = Gtk.Button(label='Click here')
-        self.button.connect('clicked', self.on_button_clicked)
-        self.box.pack_start(self.button, True, True, 0)
+    def add_word(self, widget):
+        # insert word with its translation in database
+        with session_scope() as session:
+            word = Word(word='test word', translation='test translation')
+            word.insert(session)
+            print('Word inserted')
 
-        # label
-        self.label = Gtk.Label(label='My label')
-        self.box.pack_start(self.label, True, True, 0)
+    def remove_word(self, widget):
+        pass
 
-    def on_button_clicked(self, widget):
-        print('Button clicked!')
+    def edit_word(self, widget):
+        pass
+
+    def goto_next_word(self, widget):
+        pass
+
+    def goto_previous_word(self, widget):
+        pass
+
+    def search_word(self, widget):
+        pass
 
 
-# window & its main loop
-win = MyWindow()
-win.connect('destroy', Gtk.main_quit)
-win.show_all()
-Gtk.main()
+if __name__ == '__main__':
+    # window & its main loop
+    win = MyWindow()
+    win.connect('destroy', Gtk.main_quit)
+    win.show_all()
+    Gtk.main()
