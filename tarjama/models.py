@@ -41,21 +41,46 @@ class Word(Base):
     translation = Column(String, nullable=False)
     date = Column(DateTime, nullable=False)
 
-    def insert(self):
+    @classmethod
+    def insert(cls, word):
         # insert word with its translation
         with session_scope() as session:
-            # word = Word(word='test word', translation='test translation')
-            session.add(self)
-            print('Word inserted')
+            print('Inserting word...')
+            session.add(word)
+
+            # update database to get id of inserted word
+            session.flush()
+            word_id = word.id
+
+        return word_id
 
     @classmethod
     def retrieve_all(cls):
         # retrieve all words
         with session_scope() as session:
+            print('Retrieving all words...')
             words = session.query(cls).all()
             session.expunge_all()
 
         return words
+
+    @classmethod
+    def retrieve_by_id(cls, pk):
+        # retrieve word by id
+        with session_scope() as session:
+            print('Retrieving word...')
+            word = session.query(cls).get(pk)
+            session.expunge_all()
+
+        return word
+
+    @classmethod
+    def delete_by_id(cls, pk):
+        # delete word by id
+        with session_scope() as session:
+            print('Deleting word...')
+            word = session.query(cls).get(pk)
+            session.delete(word)
 
 
 # create table if non-existing

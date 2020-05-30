@@ -100,15 +100,28 @@ class MyWindow(Gtk.Window):
         self.add(self.list)
 
     def add_word(self, widget):
+        # insert new word in database
         word = Word(word='test word', translation='test translation',
                     date=datetime.now())
-        word.insert()
+        word_id = Word.insert(word)
+        word = Word.retrieve_by_id(word_id)
+
+        # add inserted word to list view
+        store = self.list.get_model()
+        store.append([word.id, word.word, word.translation,
+                      word.date.strftime("%Y-%m-%d %H:%M:%S")])
 
     def remove_word(self, widget):
-        pass
+        # remove word from database
+        store, iter_list = self.list.get_selection().get_selected()
+        word_id = store[iter_list][0]
+        Word.delete_by_id(word_id)
+
+        # remove row from list view
+        store.remove(iter_list)
 
     def edit_word(self, widget):
-        # get word id in selected row
+        # get selected row
         store, iter_list = self.list.get_selection().get_selected()
         word_id = store[iter_list][1]
         print('word id:', word_id)
