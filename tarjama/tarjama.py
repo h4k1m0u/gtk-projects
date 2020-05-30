@@ -78,21 +78,24 @@ class MyWindow(Gtk.Window):
         words = Word.retrieve_all()
 
         # fill list model with words from database
-        store = Gtk.ListStore(str, str, str)
+        store = Gtk.ListStore(int, str, str, str)
         for word in words:
-            store.append([word.word, word.translation,
+            store.append([word.id, word.word, word.translation,
                           word.date.strftime("%Y-%m-%d %H:%M:%S")])
 
         # add list view to window
         self.list = Gtk.TreeView(store)
+        column_id = Gtk.TreeViewColumn(
+            'Id', Gtk.CellRendererText(), text=0)
+        self.list.append_column(column_id)
         column_word = Gtk.TreeViewColumn(
-            'Word', Gtk.CellRendererText(), text=0)
+            'Word', Gtk.CellRendererText(), text=1)
         self.list.append_column(column_word)
         column_translation = Gtk.TreeViewColumn(
-            'Translation', Gtk.CellRendererText(), text=1)
+            'Translation', Gtk.CellRendererText(), text=2)
         self.list.append_column(column_translation)
         column_date = Gtk.TreeViewColumn(
-            'Date', Gtk.CellRendererText(), text=2)
+            'Date', Gtk.CellRendererText(), text=3)
         self.list.append_column(column_date)
         self.add(self.list)
 
@@ -105,13 +108,30 @@ class MyWindow(Gtk.Window):
         pass
 
     def edit_word(self, widget):
-        pass
+        # get word id in selected row
+        store, iter_list = self.list.get_selection().get_selected()
+        word_id = store[iter_list][1]
+        print('word id:', word_id)
 
     def goto_next_word(self, widget):
-        pass
+        # get selected row
+        selection = self.list.get_selection()
+        store, iter_list = selection.get_selected()
+
+        # set cursor to next row or first if limit reached
+        iter_list_first = store.get_iter_first()
+        iter_list = store.iter_next(iter_list) or iter_list_first
+        selection.select_iter(iter_list)
 
     def goto_previous_word(self, widget):
-        pass
+        # get selected row
+        selection = self.list.get_selection()
+        store, iter_list = selection.get_selected()
+
+        # set cursor to previous row or last if limit reached
+        iter_list_last = store.iter_nth_child(None, store.iter_n_children()-1)
+        iter_list = store.iter_previous(iter_list) or iter_list_last
+        selection.select_iter(iter_list)
 
     def search_word(self, widget):
         pass
