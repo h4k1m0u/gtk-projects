@@ -1,4 +1,5 @@
-from models import Word, session_scope
+from models import Word
+from datetime import datetime
 import gi
 
 gi.require_version("Gtk", "3.0")
@@ -61,6 +62,9 @@ class MyWindow(Gtk.Window):
         button_search.add(image)
         headerbar.pack_end(button_search)
 
+        # load data from database
+        self.show_words()
+
         # connect handler to buttons click events
         button_add.connect('clicked', self.add_word)
         button_remove.connect('clicked', self.remove_word)
@@ -69,12 +73,33 @@ class MyWindow(Gtk.Window):
         button_up.connect('clicked', self.goto_previous_word)
         button_search.connect('clicked', self.search_word)
 
+    def show_words(self):
+        # load words from database
+        words = Word.retrieve_all()
+
+        # fill list model with words from database
+        store = Gtk.ListStore(str, str, str)
+        for word in words:
+            store.append([word.word, word.translation,
+                          word.date.strftime("%Y-%m-%d %H:%M:%S")])
+
+        # add list view to window
+        self.list = Gtk.TreeView(store)
+        column_word = Gtk.TreeViewColumn(
+            'Word', Gtk.CellRendererText(), text=0)
+        self.list.append_column(column_word)
+        column_translation = Gtk.TreeViewColumn(
+            'Translation', Gtk.CellRendererText(), text=1)
+        self.list.append_column(column_translation)
+        column_date = Gtk.TreeViewColumn(
+            'Date', Gtk.CellRendererText(), text=2)
+        self.list.append_column(column_date)
+        self.add(self.list)
+
     def add_word(self, widget):
-        # insert word with its translation in database
-        with session_scope() as session:
-            word = Word(word='test word', translation='test translation')
-            word.insert(session)
-            print('Word inserted')
+        word = Word(word='test word', translation='test translation',
+                    date=datetime.now())
+        word.insert()
 
     def remove_word(self, widget):
         pass

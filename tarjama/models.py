@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String, DateTime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from contextlib import contextmanager
@@ -39,9 +39,23 @@ class Word(Base):
     id = Column(Integer, primary_key=True)
     word = Column(String, nullable=False)
     translation = Column(String, nullable=False)
+    date = Column(DateTime, nullable=False)
 
-    def insert(self, session):
-        session.add(self)
+    def insert(self):
+        # insert word with its translation
+        with session_scope() as session:
+            # word = Word(word='test word', translation='test translation')
+            session.add(self)
+            print('Word inserted')
+
+    @classmethod
+    def retrieve_all(cls):
+        # retrieve all words
+        with session_scope() as session:
+            words = session.query(cls).all()
+            session.expunge_all()
+
+        return words
 
 
 # create table if non-existing
