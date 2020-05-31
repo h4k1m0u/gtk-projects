@@ -1,4 +1,5 @@
 from models import Word
+from dialogs import Dialog
 from datetime import datetime
 import gi
 
@@ -65,7 +66,7 @@ class MyWindow(Gtk.Window):
         # load data from database
         self.show_words()
 
-        # connect handler to buttons click events
+        # connect buttons clicked signals
         button_add.connect('clicked', self.add_word)
         button_remove.connect('clicked', self.remove_word)
         button_edit.connect('clicked', self.edit_word)
@@ -83,39 +84,73 @@ class MyWindow(Gtk.Window):
             store.append([word.id, word.word, word.translation,
                           word.date.strftime("%Y-%m-%d %H:%M:%S")])
 
+        # editable cells for each column
+        cell = Gtk.CellRendererText(editable=False)
+        cell_word = Gtk.CellRendererText(editable=True)
+        cell_translation = Gtk.CellRendererText(editable=True)
+
         # add list view to window
         self.list = Gtk.TreeView(store)
-        column_id = Gtk.TreeViewColumn(
-            'Id', Gtk.CellRendererText(), text=0)
-        self.list.append_column(column_id)
-        column_word = Gtk.TreeViewColumn(
-            'Word', Gtk.CellRendererText(), text=1)
-        self.list.append_column(column_word)
+        column_id = Gtk.TreeViewColumn('Id', cell, text=0)
+        column_word = Gtk.TreeViewColumn('Word', cell_word, text=1)
         column_translation = Gtk.TreeViewColumn(
-            'Translation', Gtk.CellRendererText(), text=2)
+            'Translation', cell_translation, text=2)
+        column_date = Gtk.TreeViewColumn('Date', cell, text=3)
+        self.list.append_column(column_id)
+        self.list.append_column(column_word)
         self.list.append_column(column_translation)
-        column_date = Gtk.TreeViewColumn(
-            'Date', Gtk.CellRendererText(), text=3)
         self.list.append_column(column_date)
         self.add(self.list)
 
+        # connect text cell edited signals
+        cell_word.connect('edited', self.edit_field, 1)
+        cell_translation.connect('edited', self.edit_field, 2)
+
+    def edit_field(self, widget, path, text, column):
+        # get edited row & its old values
+        store = self.list.get_model()
+        row = store[path]
+        pk, word, translation = row[0], row[1], row[2]
+
+        # update database field according to given column
+        word = text if column == 1 else word
+        translation = text if column == 2 else translation
+        Word.update_by_id(pk, word, translation)
+
+        # update model with edited text
+        row[column] = text
+
     def add_word(self, widget):
-        # insert new word in database
-        word = Word(word='test word', translation='test translation',
-                    date=datetime.now())
-        word_id = Word.insert(word)
-        word = Word.retrieve_by_id(word_id)
+        # show dialog and get button clicked code
+        dialog = Dialog(self)
+        response = dialog.run()
+        dialog.destroy()
+
+        if response != Gtk.ResponseType.OK:
+            return
+
+        # get entered word & translation
+        word = dialog.word.strip()
+        translation = dialog.translation.strip()
+        if word == '' or translation == '':
+            return
+
+        # insert new word entered in database
+        record = Word(word=word, translation=translation,
+                      date=datetime.now())
+        pk = Word.insert(record)
+        record = Word.retrieve_by_id(pk)
 
         # add inserted word to list view
         store = self.list.get_model()
-        store.append([word.id, word.word, word.translation,
-                      word.date.strftime("%Y-%m-%d %H:%M:%S")])
+        store.append([record.id, record.word, record.translation,
+                      record.date.strftime("%Y-%m-%d %H:%M:%S")])
 
     def remove_word(self, widget):
         # remove word from database
         store, iter_list = self.list.get_selection().get_selected()
-        word_id = store[iter_list][0]
-        Word.delete_by_id(word_id)
+        pk = store[iter_list][0]
+        Word.delete_by_id(pk)
 
         # remove row from list view
         store.remove(iter_list)
@@ -123,8 +158,29 @@ class MyWindow(Gtk.Window):
     def edit_word(self, widget):
         # get selected row
         store, iter_list = self.list.get_selection().get_selected()
-        word_id = store[iter_list][1]
-        print('word id:', word_id)
+        pk = store[iter_list][0]
+        record = Word.retrieve_by_id(pk)
+
+        # show dialog and get button clicked code
+        dialog = Dialog(self, record.word, record.translation)
+        response = dialog.run()
+        dialog.destroy()
+
+        if response != Gtk.ResponseType.OK:
+            return
+
+        # get entered word & translation
+        word = dialog.word.strip()
+        translation = dialog.translation.strip()
+        if word == '' or translation == '':
+            return
+
+        # update database field according to given column
+        Word.update_by_id(pk, word, translation)
+
+        # update edited list row
+        store[iter_list][1] = word
+        store[iter_list][2] = translation
 
     def goto_next_word(self, widget):
         # get selected row

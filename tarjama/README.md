@@ -37,7 +37,7 @@ After the installation, support for Arabic can be enabled by running `bicon` fro
 # SQLite database
 -----------------
 ## Prerequisites
-- SQLite and SQLAlchemy
+SQLite and SQLAlchemy
 
 ```bash
 sudo apt install sqlite3

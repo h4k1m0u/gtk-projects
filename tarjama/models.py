@@ -42,45 +42,54 @@ class Word(Base):
     date = Column(DateTime, nullable=False)
 
     @classmethod
-    def insert(cls, word):
+    def insert(cls, record):
         # insert word with its translation
         with session_scope() as session:
             print('Inserting word...')
-            session.add(word)
+            session.add(record)
 
             # update database to get id of inserted word
             session.flush()
-            word_id = word.id
+            pk = record.id
 
-        return word_id
+        return pk
 
     @classmethod
     def retrieve_all(cls):
         # retrieve all words
         with session_scope() as session:
             print('Retrieving all words...')
-            words = session.query(cls).all()
+            records = session.query(cls).all()
             session.expunge_all()
 
-        return words
+        return records
+
+    @classmethod
+    def update_by_id(cls, pk, word, translation):
+        # update word by id
+        with session_scope() as session:
+            print('Updating word...')
+            record = session.query(cls).get(pk)
+            record.word = word
+            record.translation = translation
 
     @classmethod
     def retrieve_by_id(cls, pk):
         # retrieve word by id
         with session_scope() as session:
             print('Retrieving word...')
-            word = session.query(cls).get(pk)
+            record = session.query(cls).get(pk)
             session.expunge_all()
 
-        return word
+        return record
 
     @classmethod
     def delete_by_id(cls, pk):
         # delete word by id
         with session_scope() as session:
             print('Deleting word...')
-            word = session.query(cls).get(pk)
-            session.delete(word)
+            record = session.query(cls).get(pk)
+            session.delete(record)
 
 
 # create table if non-existing
