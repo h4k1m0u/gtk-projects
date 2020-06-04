@@ -3,6 +3,12 @@
 - Moussi9a: GUI audio player.
 
 
+# Prerequisites
+PyGTK+3 (LGPL) is packaged by Ubuntu ([source][PyGTK]).
+
+[PyGTK]: https://python-gtk-3-tutorial.readthedocs.io/en/latest/install.html
+
+
 # Gnome buttons icons
 
 ```bash

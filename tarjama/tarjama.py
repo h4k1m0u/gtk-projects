@@ -9,11 +9,11 @@ from gi.repository import Gtk, Gio
 
 class MyWindow(Gtk.Window):
     def __init__(self):
-        super().__init__(title='Hello world')
+        super().__init__()
 
         # header bar with title and close button
-        headerbar = Gtk.HeaderBar()
-        headerbar.props.title = 'Tarjama'
+        headerbar = Gtk.HeaderBar(title='Tarjama')
+        headerbar.set_subtitle('database.db')
         headerbar.set_show_close_button(True)
         self.set_titlebar(headerbar)
 

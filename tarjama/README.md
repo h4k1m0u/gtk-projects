@@ -7,8 +7,7 @@ GUI application made with PyGTK 3.0 showing on a grid words and their correspond
 - Possibility to add/remove/edit words and their translations on the table.
 
 
-# SQLite database
-## Prerequisites
+# Prerequisites
 SQLite and SQLAlchemy
 
 ```bash
@@ -16,7 +15,8 @@ sudo apt install sqlite3
 pip install sqlalchemy
 ```
 
-## Database
+
+# Database
 The database table is created automatically if it doesn't exist.
 
 ```bash
